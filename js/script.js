@@ -48,8 +48,8 @@ const optArticleSelector = '.post',
   optTitleSelector = '.post-title',
   optTitleListSelector = '.titles',
   optArticleTagsSelector = '.post-tags .list',
-  optTagsListSelector = '.list-tags',
-  optAuthorsListSelector = '.list-authors'
+  optTagsListSelector = '.list.tags',
+  optAuthorsListSelector = '.list.authors'
 
 function generateTitleLinks(customSelector = '') {
   //console.log(customSelector)
@@ -213,7 +213,7 @@ function tagClickHandler(e) {
 
 function addClickListenersToTags() {
   /* find all links to tags */
-  const links = document.querySelectorAll('.post-tags .list li a')
+  const links = document.querySelectorAll('a[href^="#tag-"]')
   //console.log(links)
   /* START LOOP: for each link */
   for (let link of links) {
@@ -230,20 +230,50 @@ addClickListenersToTags()
 const optArticleAuthorSelector = '.post-author'
 
 function generateAuthors() {
+  let allAuthors = {}
   const articles = document.querySelectorAll(optArticleSelector)
   for (let article of articles) {
     const author = article.getAttribute('data-author')
+    if (!allAuthors[author]) {
+      allAuthors[author] = 1
+    } else {
+      allAuthors[author]++
+    }
+    //console.log(author)
     const authorWrapper = article.querySelector(optArticleAuthorSelector)
+
     const linkHTML =
       ' <a href="#author-' + author + '"><span>' + author + '</span></a>'
     authorWrapper.innerHTML = linkHTML
+    //console.log(authorWrapper.innerHTML)
+
+    const authorList = document.querySelector(optAuthorsListSelector)
+    //console.log(authorList)
+    const authorParams = calculateTagsParams(allAuthors)
+
+    let allAuthorsHTML = ''
+
+    for (let author in allAuthors) {
+      const authorLinkHTML =
+        ' <li><a class="' +
+        calculateTagClass(allAuthors[author], authorParams) +
+        '" href="#author-' +
+        author +
+        '"><span>' +
+        author +
+        '  ' +
+        '</span></a></li> '
+      allAuthorsHTML += authorLinkHTML
+    }
+    authorList.innerHTML = allAuthorsHTML
   }
 }
 
 generateAuthors()
 
 function addClickListenersToAuthors() {
-  const links = document.querySelectorAll('.post-author a')
+  const links = document.querySelectorAll('a[href^="#author-"]')
+
   //console.log(links)
   for (let link of links) {
     link.addEventListener('click', authorClickHandler)
