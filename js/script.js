@@ -6,6 +6,24 @@
 //
 'use strict'
 
+const templates = {
+  articleLink: Handlebars.compile(
+    document.querySelector('#template-article-link').innerHTML
+  ),
+  tagLink: Handlebars.compile(
+    document.querySelector('#template-tag-link').innerHTML
+  ),
+  authorLink: Handlebars.compile(
+    document.querySelector('#template-author-link').innerHTML
+  ),
+  tagCloudLink: Handlebars.compile(
+    document.querySelector('#template-tagcloud-link').innerHTML
+  ),
+  authorCloudLink: Handlebars.compile(
+    document.querySelector('#template-authorcloud-link').innerHTML
+  ),
+}
+
 const titleClickHandler = function (e) {
   e.preventDefault()
   const clickedElement = this
@@ -71,12 +89,8 @@ function generateTitleLinks(customSelector = '') {
     const articleTitle = article.querySelector(optTitleSelector).innerHTML
 
     /* create HTML of the link */
-    const linkHTML =
-      '<li><a href="#' +
-      articleId +
-      '"><span>' +
-      articleTitle +
-      '</span></a></li>'
+    const linkHTMLData = { id: articleId, title: articleTitle }
+    const linkHTML = templates.articleLink(linkHTMLData)
     //console.log(linkHTML)
     /* insert link into titleList */
     html += linkHTML
@@ -131,8 +145,8 @@ function generateTags() {
     /* START LOOP: for each tag */
     for (let tag of tagsArr) {
       /* generate HTML of the link */
-      const linkHTML =
-        ' <li><a href="#tag-' + tag + '"><span>' + tag + '</span></a></li> '
+      const linkHTMLData = { tag: tag }
+      const linkHTML = templates.tagLink(linkHTMLData)
       /* add generated code to html variable */
       html += linkHTML
       /* [NEW] check if this link is NOT already in allTags */
@@ -153,28 +167,21 @@ function generateTags() {
     const tagsParams = calculateTagsParams(allTags)
     //console.log('tag params: ', tagsParams)
     /* [NEW] create variable for all links HTML code */
-    let allTagsHTML = ''
+    const allTagsData = { tags: [] }
 
     /* [NEW] START LOOP: for each tag in allTags: */
     for (let tag in allTags) {
-      /* [NEW] generate code of a link and add it to allTagsHTML */
-      const tagLinkHTML =
-        ' <li><a class="' +
-        calculateTagClass(allTags[tag], tagsParams) +
-        '" href="#tag-' +
-        tag +
-        '"><span>' +
-        tag +
-        '  ' +
-        '</span></a></li> '
-      //console.log('tagLinkHTML:', tagLinkHTML)
-
-      allTagsHTML += tagLinkHTML
+      allTagsData.tags.push({
+        tag: tag,
+        count: allTags[tag],
+        className: calculateTagClass(allTags[tag], tagsParams),
+      })
     }
     /* [NEW] END LOOP: for each tag in allTags: */
 
     /*[NEW] add HTML from allTagsHTML to tagList */
-    tagList.innerHTML = allTagsHTML
+    tagList.innerHTML = templates.tagCloudLink(allTagsData)
+    //console.log(allTagsData)
   }
 }
 
@@ -242,8 +249,8 @@ function generateAuthors() {
     //console.log(author)
     const authorWrapper = article.querySelector(optArticleAuthorSelector)
 
-    const linkHTML =
-      ' <a href="#author-' + author + '"><span>' + author + '</span></a>'
+    const linkHTMLData = { author }
+    const linkHTML = templates.authorLink(linkHTMLData)
     authorWrapper.innerHTML = linkHTML
     //console.log(authorWrapper.innerHTML)
 
@@ -251,21 +258,17 @@ function generateAuthors() {
     //console.log(authorList)
     const authorParams = calculateTagsParams(allAuthors)
 
-    let allAuthorsHTML = ''
+    const allAuthorsData = { authors: [] }
 
     for (let author in allAuthors) {
-      const authorLinkHTML =
-        ' <li><a class="' +
-        calculateTagClass(allAuthors[author], authorParams) +
-        '" href="#author-' +
-        author +
-        '"><span>' +
-        author +
-        '  ' +
-        '</span></a></li> '
-      allAuthorsHTML += authorLinkHTML
+      allAuthorsData.authors.push({
+        author,
+        count: allAuthors[author],
+        className: calculateTagClass(allAuthors[author], authorParams),
+      })
     }
-    authorList.innerHTML = allAuthorsHTML
+    authorList.innerHTML = templates.authorCloudLink(allAuthorsData)
+    console.log(allAuthorsData)
   }
 }
 
